@@ -1,0 +1,8 @@
+{
+  "projects": {"demo": "/absolute/path/to/reviewed-project"},
+  "codex": {
+    "enabled": false,
+    "threads": {},
+    "imports": {}
+  }
+}

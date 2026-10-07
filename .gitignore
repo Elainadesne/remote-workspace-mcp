@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+dist/
+build/
+config.json
+.env*
+chat-exports/
+profiles/
+*.log
+.coverage
+htmlcov/
