@@ -1,2 +1,2 @@
-"""Read-only project and Codex history bridge."""
-__version__ = '0.2.0'
+"""Read-only remote workspace with optional selected Codex history."""
+__version__ = '0.3.0'
