@@ -49,6 +49,16 @@ HTTP 使用**无状态、单 JSON 响应**模式：不分配 session ID，不保
 
 只支持现代协议的客户端无法接入本版本。支持双协议时代的客户端应根据旧版错误进入 initialize 回退；例如 ZCode 示例明确设为 `legacy`。携带 2026 逐请求元信息或 2026 版本头的请求不会被当成 2025 请求悄悄执行。
 
+### 客户端验证状态
+
+| 客户端 / 方式 | 截至 2026-10-07 的验证 |
+| --- | --- |
+| ZCode 3.14.4 / Windows 经 SSH 回环 8766 到 Ubuntu | 用户回传合成目录的 `list_projects`、`read_file`、`search_text` 成功结果；未直接采集 ZCode 运行日志 |
+| 官方 Python MCP SDK 1.30.0 / localhost HTTP | 自动契约测试直接验证 initialize、工具发现、读取和合成错误/权限/资源边界 |
+| ZCode stdio；Claude Code HTTP/stdio | 已核对配置模板，尚无真实客户端接入验收 |
+
+本次 ZCode 反馈不包含握手协议版本原始日志，不能据此增加上方协议矩阵的版本范围。详细返回值、提交和复现入口见[客户端接入记录](CLIENTS.md#zcode-3144-合成目录反馈)。
+
 ## 请求与错误契约
 
 - 每次都是 POST `/mcp`、单个 JSON-RPC 2.0 对象；不接受 batch、重复 JSON 键、NaN、非法 UTF-8、非对象 params、无 method 的客户端响应
@@ -84,6 +94,8 @@ stdio 和私有 REST 继续只用 Python 标准库。HTTP 可选依赖为官方 
 /absolute/path/to/bridge-http-env/bin/python -m compileall -q bridge tests
 ```
 
-自动测试包含真实 localhost HTTP、官方 Python SDK 客户端 initialize/list/call、通知、错误、权限和超时契约。ZCode 与 Claude Code 配置示例进行自动结构检查，但**尚未启动这两个真实客户端做端到端验收**。此候选也没有部署到真实 VM 或改变既有隧道。
+自动测试包含真实 localhost HTTP、官方 Python SDK 客户端 initialize/list/call、通知、错误、权限和超时契约；ZCode 与 Claude Code 配置示例另做自动结构检查。2026-10-07，用户回传 ZCode 3.14.4 经 Windows → SSH 回环 8766 → Ubuntu 的合成目录三项成功结果，记录对应提交 `87f62b360b0f857a07ceb2bc39241c11ca70bc96`。证据是用户回传，而非直接采集的 ZCode 日志。
+
+这次实际接入仅覆盖合成项目列表、README 读取和搜索，不涵盖真实项目、其余工具、当前候选 Codex 历史、实际客户端越权拒绝用例、OAuth 或自动重启；桥接没有写入/命令执行能力。Claude Code 与 ZCode stdio 仍未做真实接入验收，也不据此宣称旧桥接已切换或完成公网部署。
 
 参考：[2025 HTTP 规范](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports)、[2025 生命周期](https://modelcontextprotocol.io/specification/2025-11-25/basic/lifecycle)、[2026 HTTP 变更](https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http)、[SDK v1.30.0](https://github.com/modelcontextprotocol/python-sdk/releases/tag/v1.30.0)、[SDK 安全公告](https://github.com/modelcontextprotocol/python-sdk/security/advisories)。

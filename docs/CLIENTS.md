@@ -2,7 +2,18 @@
 
 接口不依赖调用方的模型供应商或会话存储格式。文件、字面量搜索与项目概况来自授权目录；`list_threads`/`read_thread` 是另外的可选 Codex 历史适配。没有“通用会话恢复”，也不猜测 ZCode、Claude Code 或其他工具的私有历史路径。
 
-以下配置在 2026-10-07 对照官方文档/源码，自动测试检查结构与预期字段。**配置正确不等于已真实接通该客户端。** 实际安装后仍须依次验收 initialize、tools/list、list_projects、read_file，以及拒绝未授权项目。
+以下配置在 2026-10-07 对照官方文档/源码，自动测试检查结构与预期字段。配置核对、自动契约测试与用户实际接入反馈分别列出；任何一项都不能替代未覆盖功能的验收。
+
+## 客户端验证矩阵（2026-10-07）
+
+| 客户端 / 方式 | 证据 | 已确认范围 |
+| --- | --- | --- |
+| ZCode 3.14.4 / HTTP，经 Windows → SSH 回环 8766 → Ubuntu | 用户回传三项工具调用结果，未直接采集客户端日志 | 合成目录的项目列表、README 读取、字面量搜索；见下方记录 |
+| ZCode / stdio | 官方配置文档、源码核对及模板结构测试 | 配置示例；未做真实客户端接入验收 |
+| Claude Code / HTTP、stdio | 官方文档核对及模板结构测试 | 配置示例；未做真实客户端接入验收 |
+| 官方 Python MCP SDK 1.30.0 / localhost HTTP | 自动测试直接运行客户端与服务端 | initialize、工具发现、读取及合成协议/权限/资源边界用例；不是 ZCode 或 Claude Code 测试 |
+
+新安装仍需按自己的环境验收工具发现、所需调用和拒绝未授权项目。ZCode 的三项正向反馈不代表其余工具或完整安全测试均已通过。
 
 ## ZCode
 
@@ -13,6 +24,35 @@
 HTTP 示例中 `<operator-provided BRIDGE_TOKEN>` 是替换说明。由操作者填写与服务环境变量相同的既有专用 token。**不要假设原生 ZCode 配置支持 `${BRIDGE_TOKEN}` 插值**；原生源码把 headers 直接交给传输层，插件配置的环境变量扩展是不同机制。需要只从环境传入且不保存客户端 token 时，可选 stdio。stdio 不需要 HTTP token。
 
 官方来源：[MCP 配置说明](https://zcode.z.ai/en/docs/mcp-services#configuration-files-and-default-load-paths)、[原生配置 schema](https://github.com/zai-org/ZCode/blob/29628c9acdb81b703bbd4080c207a0e7ce5e276e/apps/zcode-cli/packages/adapters/src/config/schema.ts#L46-L113)、[HTTP headers 传递](https://github.com/zai-org/ZCode/blob/29628c9acdb81b703bbd4080c207a0e7ce5e276e/apps/zcode-cli/packages/adapters/src/mcp/index.ts#L1448-L1457)、[协议选择](https://github.com/zai-org/ZCode/blob/29628c9acdb81b703bbd4080c207a0e7ce5e276e/apps/zcode-cli/packages/adapters/src/mcp/index.ts#L1773-L1778)。源码参考点对应 ZCode 3.14.3。
+
+### ZCode 3.14.4 合成目录反馈
+
+日期：2026-10-07。服务端为 0.3.0 候选[提交 `87f62b360b0f857a07ceb2bc39241c11ca70bc96`](https://github.com/Elainadesne/vm-codex-mcp-bridge/commit/87f62b360b0f857a07ceb2bc39241c11ca70bc96)，运行在 Ubuntu；Windows 上的 ZCode 3.14.4 通过 SSH 本地转发连接 VM 的回环端口 8766。使用独立 files-only 合成项目和由操作者自行提供的专用 token，没有将真实项目加入此次验收范围。
+
+**证据来源是用户粘贴回传的工具结果，不是维护者直接采集的 ZCode 运行日志。** 回传结果如下：
+
+- `list_projects` 返回 `["demo"]`
+- `read_file(project="demo", path="README.md")` 返回下列合成文字
+- `search_text` 搜索 `hello workspace`，命中 `README.md` 第 4 行，`truncated=false`
+
+```text
+# Synthetic MCP acceptance workspace
+
+This directory contains test data only.
+Expected search phrase: hello workspace
+```
+
+用户报告整个流程仅调用 workspace-test 的 MCP 工具，未调用本机终端或其他工具。这次反馈只确认上述三项正向调用；没有提供原始握手日志、其余五个工具、实际客户端越权拒绝用例、ZCode stdio、真实项目或当前候选 Codex 历史的验收证据。OAuth、自动重启未验收；写文件、执行命令和恢复会话均不属于本桥接提供的能力。
+
+复现这类独立验收时，可使用另一空闲端口，保持两端一致。例如操作者先在 Linux 端以前台服务监听 `127.0.0.1:8766`，再在 Windows 终端运行：
+
+```sh
+ssh -N -L 127.0.0.1:8766:127.0.0.1:8766 -o ExitOnForwardFailure=yes user@linux-host
+```
+
+然后让客户端连接 `http://127.0.0.1:8766/mcp`。`user@linux-host` 是占位符，由操作者替换并核对 SSH 主机指纹；这不是启用 SSH 服务或开放防火墙的指令。服务与 SSH 终端需要保持开启，停止前台进程即可断开。8766 是本次独立测试端口，仓库默认端口仍为 8765。不要公开主机地址、私有路径或 Authorization 值。
+
+固定提交及文件哈希的安装流程只适用于其明确指定的提交。后续文档更新不会自动改变已安装候选或使旧哈希适用于新提交。
 
 ## Claude Code
 
