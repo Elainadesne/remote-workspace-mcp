@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 [project]
 name = "vm-codex-mcp-bridge"
-version = "0.2.0"
+version = "0.3.0"
 description = "Remote Workspace MCP: read-only workspace files with optional selected Codex history"
 readme = "README.md"
 license = {file = "LICENSE"}
@@ -17,6 +17,9 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
 ]
+[project.optional-dependencies]
+http = ["mcp>=1.30.0,<2", "uvicorn>=0.52.1,<0.53"]
+
 [project.urls]
 Repository = "https://github.com/Elainadesne/remote-workspace-mcp"
 [project.scripts]

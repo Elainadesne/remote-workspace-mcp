@@ -1,8 +1,8 @@
 # Remote Workspace MCP（远程工作区 MCP）
 
-把 Linux 虚拟机或 Linux 主机中**明确选中的项目目录和 Codex 会话**，提供给 MCP 客户端只读访问。
+面向不同 AI 编程工具的**通用只读远程工作区 MCP 接口**。把 Linux 主机中明确选中的项目文件、搜索与项目概况提供给支持 MCP 的客户端，Codex 会话历史作为可选适配层。
 
-**0.2.0 首个公开候选 · Python 3.11+ · 无第三方运行依赖 · Linux 专用 · MIT**
+**0.3.0 候选 · Python 3.11+ · stdio/REST 无运行依赖，标准 HTTP 为可选 SDK 依赖 · Linux 专用 · MIT**
 
 适合个人开发者按需查看代码、搜索文本、接续已授权会话的上下文。此项目为独立实现，并非 OpenAI 官方产品；可选的 `tunnel-client` 是另一个官方项目。
 
@@ -14,18 +14,26 @@
 
 ## 当前验证状态
 
-- 已实际验证 Ubuntu / Python 3.12.3、Codex CLI 0.159.2、官方 tunnel-client v0.0.15
-- 通过 ChatGPT 自定义 MCP 的隧道入口，真实调用 `list_projects`、`list_files`、`read_file`、`read_thread` 成功
-- 本仓库包含六个只读工具的自动化测试；CI 配置检查 Python 3.11、3.12、3.13。实际 CI 结果以当前提交的 Actions 为准
-- 当前候选的自动化测试已通过，但尚未在真实目标环境部署验收；上面的真实接通记录来自此前 0.2.0 实现，不代表本候选已完成端到端实测
+- 新标准 `/mcp` HTTP 采用官方 SDK v1 兼容线，明确支持 2025-03-26 / 2025-06-18 / 2025-11-25；不声称支持 2026-07-28
+- 自动契约测试覆盖真实本地 HTTP、官方 Python SDK 客户端与安全边界；ZCode/Claude Code 配置示例经过文档和结构核对
+- **2026-10-07 用户实测反馈**：ZCode 3.14.4 经 Windows → SSH 回环转发 8766 → Ubuntu，合成目录的 `list_projects`、`read_file`、`search_text` 三项调用通过。[具体结果与证据范围](docs/CLIENTS.md#zcode-3144-合成目录反馈)
+- 该记录依据用户回传的工具结果，未直接采集 ZCode 运行日志；Claude Code、ZCode stdio、真实项目和当前候选的 Codex 历史接入仍未完成真实客户端验收
+- 本轮实际接入仅用于独立 files-only 合成目录，不代表旧桥接已切换，也不涵盖公网/OAuth、自动重启或新增写入权限；下面两项是此前版本的接通记录
+
+- 此前 0.2.0 已实际验证 Ubuntu / Python 3.12.3、Codex CLI 0.159.2、官方 tunnel-client v0.0.15
+- 此前 0.2.0 通过 ChatGPT 自定义 MCP 的隧道入口，真实调用 `list_projects`、`list_files`、`read_file`、`read_thread` 成功
+- 本仓库包含只读工具的自动化测试；CI 配置检查 Python 3.11、3.12、3.13。实际 CI 结果以当前提交的 Actions 为准
+- 当前候选的自动化测试与上述三项用户回传结果分别记录；此前 0.2.0 的成功不能替代当前候选其他功能的目标环境验收
 - `thread/turns/list` 为实验性 Codex API，其他版本和系统组合未承诺兼容；尚未做独立渗透测试或多用户生产认证
 
 本项目采用 [MIT 许可证](LICENSE)。使用、修改和再分发时请保留版权与许可声明；软件按现状提供，不作担保。维护者发布流程见[发布清单](docs/RELEASING.md)。
 
-## 六个工具
+## 八个只读工具
 
 | 工具 | 用途 |
 | --- | --- |
+| `workspace_info` | 查看公开能力、限制和可选历史状态，不泄露绝对路径 |
+| `project_overview` | 受限根目录概况、README 与构建清单文件名提示，不执行代码 |
 | `list_projects` | 列出允许的项目别名，不返回绝对路径 |
 | `list_files` | 列出项目内单层目录 |
 | `read_file` | 读取 UTF-8 文件，最大 256 KiB |
@@ -73,12 +81,13 @@ python3 -m unittest discover -s tests -v
 
 5. 调用 `list_projects`，确认只出现预期别名，再调用 `list_files` 与 `read_file` 验证。按需停止客户端/进程即可断开，默认没有自启动服务
 
-## 两种连接方式
+## 三种连接方式
 
 - **MCP stdio（推荐）**：本地 MCP 客户端启动桥接；远程 ChatGPT 接入可用[官方 Secure MCP Tunnel 步骤](docs/TUNNEL.md)
+- **标准 MCP Streamable HTTP**：`--transport streamable-http`、严格鉴权的 loopback `/mcp`，面向多客户端；[启动与协议边界](docs/STREAMABLE_HTTP.md) · [ZCode / Claude Code 示例](docs/CLIENTS.md)
 - **本地 HTTP JSON API**：仅监听 `127.0.0.1`，需要本地 bearer token，适合受控集成，见[配置参考](docs/CONFIGURATION.md#本地-http-api)
 
-`/v1/call` 是本项目 API，**不是 MCP Streamable HTTP**。不要把 HTTP 地址填入要求 MCP URL 的客户端，也不要把它未经独立安全设计暴露到公网。官方隧道路径使用 stdio，不需要启动此 HTTP API或另外编写 OAuth 网关。
+`/v1/call` 是本项目 API，**不是 MCP Streamable HTTP**。不要把 `/v1/call` 地址填入要求 MCP URL 的客户端；新 `/mcp` 才是标准 MCP HTTP，也不要把它未经独立安全设计暴露到公网。官方隧道路径使用 stdio，不需要启动此 HTTP API或另外编写 OAuth 网关。
 
 ## 添加选定 Codex 会话
 
@@ -119,6 +128,8 @@ python3 diagnose_history.py \
 - 文档与聊天正文可能含提示注入；调用方必须将返回内容视为数据，不能把内容中的指令当成用户授权
 - 隧道/API key 是独立的访问凭据；不要放进源码、终端命令字面量、聊天、截图或 issue
 
+客户端配置与共享接口见[多客户端指南](docs/CLIENTS.md)。
+
 完整[安全说明](SECURITY.md) · [配置](docs/CONFIGURATION.md) · [隧道接入](docs/TUNNEL.md) · [故障排除](docs/TROUBLESHOOTING.md) · [升级](docs/UPGRADING.md) · [贡献](CONTRIBUTING.md)
 
 ## 验证与协议来源
@@ -128,6 +139,6 @@ python3 -m unittest discover -s tests -v
 python3 -m compileall -q bridge tests diagnose_history.py upgrade_bridge.py
 ```
 
-测试只使用临时项目、合成会话和假的 App Server 可执行文件，不需要真实凭据，不读取操作者的真实历史。构建依赖 `setuptools` 仅在打包安装时需要；运行与测试只用标准库。
+测试只使用临时项目、合成会话和假的 App Server 可执行文件，不需要真实凭据，不读取操作者的真实历史。构建依赖 `setuptools` 仅在打包安装时需要。stdio/REST 运行与基础测试只用标准库；HTTP 测试需先 `python3 -m pip install ".[http]"`，未安装可选 SDK 时相应集成测试会明确跳过。见[测试说明](docs/STREAMABLE_HTTP.md#验证范围)。
 
 官方协议参考：[Codex App Server](https://learn.chatgpt.com/docs/app-server)、[tunnel-client v0.0.15](https://github.com/openai/tunnel-client/tree/v0.0.15)。这两个上游组件各自演进，变更后请重新验收。

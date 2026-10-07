@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0 — 通用只读 workspace 候选
+
+- 新增 workspace_info / project_overview；传输无关工具层与可选 Codex 历史适配分离
+- 新增官方 MCP SDK 支撑的标准 Streamable HTTP（2025 协议矩阵），保持原 stdio 与私有 REST 兼容
+- 单操作者环境 token、loopback、Host/Origin/JSON/header/size/time/concurrency 边界
+- ZCode 与 Claude Code HTTP/stdio 配置模板，迁移与安全文档，真实本地 HTTP 和官方 SDK 客户端契约测试
+- 不加入写文件、命令执行、第三方私有历史解析、会话恢复、自动部署或权限扩张
+- 2026-10-07：用户回传 ZCode 3.14.4 经 Windows/SSH 回环 8766/Ubuntu 的合成目录三项结果：项目列表、文件读取、字面量搜索成功；记录对应提交 `87f62b360b0f857a07ceb2bc39241c11ca70bc96`，证据不是直接采集的客户端日志
+- Claude Code、ZCode stdio、真实项目、当前候选 Codex 历史、OAuth 与自动重启未完成实际接入验收；不提供写入/命令执行，不宣称 2026-07-28 协议兼容
+
+
 ## 0.2.0 — First public candidate (unreleased)
 
 This source snapshot is the first public candidate. No release tag, package publication or deployment is implied. Automated checks and earlier end-to-end integration observations are described separately in README.

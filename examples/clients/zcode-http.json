@@ -1,0 +1,15 @@
+{
+  "mcp": {
+    "servers": {
+      "remote-workspace": {
+        "type": "http",
+        "protocolVersion": "legacy",
+        "url": "http://127.0.0.1:8765/mcp",
+        "headers": {
+          "Authorization": "Bearer <operator-provided BRIDGE_TOKEN>"
+        },
+        "timeoutMs": 30000
+      }
+    }
+  }
+}

@@ -101,3 +101,8 @@ Ctrl+C 退出后执行 unset。HTTP token 与隧道 runtime key 是不同凭据�
 ```
 
 成功返回 `{"result": ...}`；错误返回带错误状态码的 `{"error": ...}`。拒绝浏览器 Origin、非本地 Host、分块传输和未认证请求。不要通过改 host、代理 header 或无认证转发绕过这些边界。
+
+
+## 标准 Streamable HTTP（可选）
+
+新 transport `streamable-http` 在 loopback `/mcp` 提供官方 SDK 实现的标准 MCP。它与上述旧 `http` REST 模式分开；配置字段不变，token 仍由操作者环境提供。详见[HTTP 文档](STREAMABLE_HTTP.md)与[客户端示例](CLIENTS.md)。

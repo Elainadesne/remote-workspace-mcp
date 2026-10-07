@@ -64,7 +64,7 @@ v0.0.15 支持 HTTPS_PROXY；不要假定 ALL_PROXY 生效。代理仅用于本�
 
 保持前台进程运行，再逐项验收：
 
-1. 工具发现只应出现 README 中六个只读工具
+1. 工具发现只应出现 README 中八个只读工具
 2. `list_projects` 只返回预期项目别名
 3. `list_files` 和 `read_file` 返回已知测试文件
 4. 需要会话时再配置白名单、重启、调用 `read_thread` 并检查分页

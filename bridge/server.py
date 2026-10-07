@@ -3,63 +3,13 @@ import hmac
 import json
 import os
 import sys
-from pathlib import Path
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from . import __version__
-from .config import load_config, validate_config
-from .files import Files, BridgeError
-from .history import History
+from .config import load_config
+from .files import BridgeError
 
-TOOLS = {
-    'list_projects': {},
-    'list_files': {'project': 'string', 'path': 'string'},
-    'read_file': {'project': 'string', 'path': 'string'},
-    'search_text': {'project': 'string', 'query': 'string', 'path': 'string'},
-    'list_threads': {'project': 'string'},
-    'read_thread': {'project': 'string', 'thread_id': 'string', 'cursor': 'string'},
-}
-REQUIRED = {'list_projects': [], 'list_files': ['project'], 'read_file': ['project', 'path'],
-            'search_text': ['project', 'query'], 'list_threads': ['project'], 'read_thread': ['project', 'thread_id']}
-
-def tool_specs():
-    return [{'name': name, 'description': 'Read-only '+name.replace('_', ' '),
-             'inputSchema': {'type': 'object', 'properties': {k: {'type': t} for k, t in args.items()},
-                             'required': REQUIRED[name], 'additionalProperties': False},
-             'annotations': {'readOnlyHint': True, 'destructiveHint': False}}
-            for name, args in TOOLS.items()]
-
-class Bridge:
-    def __init__(self, config, reader=None):
-        validate_config(config)
-        self.files = Files(config['projects'])
-        codex_home = config.get('codex', {}).get('home')
-        if codex_home:
-            home = Path(codex_home).resolve()
-            if any(Path(root).is_relative_to(home) or home.is_relative_to(Path(root))
-                   for root in self.files.roots.values()):
-                raise BridgeError('Project directories and Codex home must not overlap')
-        for spec in config.get('codex', {}).get('imports', {}).values():
-            if not self.files.parts(spec['path']):
-                raise BridgeError('Imports must select a file with a relative path')
-        self.history = History(self.files, config.get('codex', {}), reader)
-    def call(self, name, args):
-        if not isinstance(name, str) or name not in TOOLS or not isinstance(args, dict):
-            raise BridgeError('Unknown tool or invalid arguments')
-        if set(args)-set(TOOLS[name]) or not set(REQUIRED[name]) <= set(args):
-            raise BridgeError('Unexpected or missing argument')
-        if any(not isinstance(v, str) or len(v) > 4096 for v in args.values()):
-            raise BridgeError('Arguments must be short strings')
-        if name == 'list_projects':
-            return sorted(self.files.roots)  # Do not leak absolute paths.
-        if name == 'list_threads':
-            return self.history.list(**args)
-        if name == 'read_thread':
-            return self.history.read(**args)
-        if name == 'list_files':
-            return self.files.list(**args)
-        if name == 'read_file':
-            return {'text': self.files.read(**args)}
-        return self.files.search(**args)
+# Backwards-compatible imports for existing callers and diagnostics.
+from .workspace import Bridge, TOOLS, REQUIRED, tool_specs
 
 def mcp(bridge, msg):
     if (not isinstance(msg, dict) or msg.get('jsonrpc') != '2.0'
@@ -141,9 +91,9 @@ def http_server(bridge, token, port):
     return HTTPServer(('127.0.0.1', port), Handler)
 
 def main():
-    parser = argparse.ArgumentParser(description='Read-only VM files and Codex history')
+    parser = argparse.ArgumentParser(description='Read-only remote workspace and optional selected Codex history')
     parser.add_argument('--config', required=True)
-    parser.add_argument('--transport', choices=['stdio', 'http'], default='stdio')
+    parser.add_argument('--transport', choices=['stdio', 'http', 'streamable-http'], default='stdio')
     parser.add_argument('--port', type=int, default=8765)
     parser.add_argument('--check-config', action='store_true',
                         help='Validate settings and local paths, without starting a server or Codex')
@@ -155,7 +105,13 @@ def main():
     if args.check_config:
         print('Configuration valid; no server or Codex process started')
         return
-    if args.transport == 'http':
+    if args.transport == 'streamable-http':
+        try:
+            from .streamable_http import serve
+            serve(bridge, os.environ.get('BRIDGE_TOKEN', ''), args.port)
+        except (BridgeError, ImportError) as error:
+            parser.exit(2, f'HTTP startup error: {error if isinstance(error, BridgeError) else "install the http extra: pip install .[http]"}\n')
+    elif args.transport == 'http':
         server = http_server(bridge, os.environ.get('BRIDGE_TOKEN', ''), args.port)
         print(f'Listening on loopback port {server.server_port}', file=sys.stderr)
         try:
