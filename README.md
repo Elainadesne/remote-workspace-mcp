@@ -1,10 +1,16 @@
-# vm-codex-mcp-bridge
+# Remote Workspace MCP（远程工作区 MCP）
 
-面向不同 AI 编程工具的**通用只读远程工作区 MCP 接口**。把 Linux 主机中明确选中的项目文件、搜索与项目概况提供给支持 MCP 的客户端，Codex 会话历史作为可选适配层。仓库名保持不变。
+面向不同 AI 编程工具的**通用只读远程工作区 MCP 接口**。把 Linux 主机中明确选中的项目文件、搜索与项目概况提供给支持 MCP 的客户端，Codex 会话历史作为可选适配层。
 
 **0.3.0 候选 · Python 3.11+ · stdio/REST 无运行依赖，标准 HTTP 为可选 SDK 依赖 · Linux 专用 · MIT**
 
 适合个人开发者按需查看代码、搜索文本、接续已授权会话的上下文。此项目为独立实现，并非 OpenAI 官方产品；可选的 `tunnel-client` 是另一个官方项目。
+
+## 项目名称与兼容性
+
+项目现名 **Remote Workspace MCP（远程工作区 MCP）**，GitHub 仓库为 [`remote-workspace-mcp`](https://github.com/Elainadesne/remote-workspace-mcp)，原名 `vm-codex-mcp-bridge`。
+
+此次更名仅调整项目展示名称和仓库链接。为兼容已有安装，Python 分发名 `vm-codex-mcp-bridge`、包名 `bridge`、命令 `vm-codex-mcp-bridge` / `vm-codex-bridge`、MCP 工具名和配置格式保持不变。现有源码目录、客户端配置名称和启动路径不需要因仓库更名而改动；新下载的源码目录请使用自己的实际路径。文档中保留的旧名称示例属于兼容技术标识或路径占位符。
 
 ## 当前验证状态
 
@@ -41,7 +47,7 @@
 
 前提：目标机器是 Linux，已安装 Python 3.11+，当前 Unix 用户有权读取选中的项目。文件功能不需要 Codex CLI、不需要登录 Codex，也不需要任何 API key。
 
-1. 从[本仓库](https://github.com/Elainadesne/vm-codex-mcp-bridge)下载源码并解压，进入源码根目录
+1. 从[本仓库](https://github.com/Elainadesne/remote-workspace-mcp)下载源码并解压，进入源码根目录
 2. 检查代码，把 `config.example.json` 复制为 `config.json`，只替换 `projects.demo` 为一个经过审阅的项目绝对路径。保留 `codex.enabled=false`，默认没有任何会话或导入授权
 3. 校验配置并运行测试：
 

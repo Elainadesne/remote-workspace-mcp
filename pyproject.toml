@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "vm-codex-mcp-bridge"
 version = "0.3.0"
-description = "Read-only remote workspace MCP with optional selected Codex history"
+description = "Remote Workspace MCP: read-only workspace files with optional selected Codex history"
 readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.11"
@@ -21,7 +21,7 @@ classifiers = [
 http = ["mcp>=1.30.0,<2", "uvicorn>=0.52.1,<0.53"]
 
 [project.urls]
-Repository = "https://github.com/Elainadesne/vm-codex-mcp-bridge"
+Repository = "https://github.com/Elainadesne/remote-workspace-mcp"
 [project.scripts]
 vm-codex-mcp-bridge = "bridge.server:main"
 vm-codex-bridge = "bridge.server:main"
