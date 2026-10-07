@@ -27,7 +27,7 @@ HTTP 示例中 `<operator-provided BRIDGE_TOKEN>` 是替换说明。由操作者
 
 ### ZCode 3.14.4 合成目录反馈
 
-日期：2026-10-07。服务端为 0.3.0 候选[提交 `87f62b360b0f857a07ceb2bc39241c11ca70bc96`](https://github.com/Elainadesne/vm-codex-mcp-bridge/commit/87f62b360b0f857a07ceb2bc39241c11ca70bc96)，运行在 Ubuntu；Windows 上的 ZCode 3.14.4 通过 SSH 本地转发连接 VM 的回环端口 8766。使用独立 files-only 合成项目和由操作者自行提供的专用 token，没有将真实项目加入此次验收范围。
+日期：2026-10-07。服务端为 0.3.0 候选[提交 `87f62b360b0f857a07ceb2bc39241c11ca70bc96`](https://github.com/Elainadesne/remote-workspace-mcp/commit/87f62b360b0f857a07ceb2bc39241c11ca70bc96)，运行在 Ubuntu；Windows 上的 ZCode 3.14.4 通过 SSH 本地转发连接 VM 的回环端口 8766。使用独立 files-only 合成项目和由操作者自行提供的专用 token，没有将真实项目加入此次验收范围。
 
 **证据来源是用户粘贴回传的工具结果，不是维护者直接采集的 ZCode 运行日志。** 回传结果如下：
 
