@@ -1,0 +1,14 @@
+{
+  "mcp": {
+    "servers": {
+      "remote-workspace": {
+        "type": "stdio",
+        "protocolVersion": "legacy",
+        "command": "python3",
+        "args": ["-m", "bridge.server", "--config", "/absolute/path/to/private/config.json", "--transport", "stdio"],
+        "cwd": "/absolute/path/to/vm-codex-mcp-bridge",
+        "timeoutMs": 30000
+      }
+    }
+  }
+}

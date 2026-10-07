@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "remote-workspace": {
+      "type": "stdio",
+      "command": "env",
+      "args": ["-C", "/absolute/path/to/vm-codex-mcp-bridge", "python3", "-m", "bridge.server", "--config", "/absolute/path/to/private/config.json", "--transport", "stdio"]
+    }
+  }
+}
