@@ -11,11 +11,11 @@ python3 -m unittest discover -s tests -v
 python3 -m compileall -q bridge tests diagnose_history.py upgrade_bridge.py
 ```
 
-运行/测试仅用 Python 标准库，不需要真实 Codex、API key、隧道或个人会话。测试使用临时目录、合成内容与假的 Codex 进程。请勿让测试依赖自己的 HOME、实际会话存储或远程账号。
+stdio/REST 与基础测试仅用 Python 标准库；完整 HTTP 测试先在独立虚拟环境安装 `python3 -m pip install ".[http]"`，再运行相同命令，不需要真实 Codex、API key、隧道或个人会话。测试使用临时目录、合成内容与假的 Codex 进程。请勿让测试依赖自己的 HOME、实际会话存储或远程账号。
 
 ## 变更原则
 
-- 保持六个工具的只读边界；新增工具或权限必须独立审阅，不能把任意 shell/RPC 透传塞进现有接口
+- 保持八个工具的只读边界；新增工具或权限必须独立审阅，不能把任意 shell/RPC 透传塞进现有接口
 - 安全修复附最小合成回归测试，包括错误输入、路径越界、异常上游格式和下一个请求仍可工作的情形
 - 不向 stdout 加日志；stdio stdout 是协议。日志不得包含正文、私密路径、游标或凭据
 - 不加入隐式线程发现、自动登录、自动授权、自启动或配置上传
