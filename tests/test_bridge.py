@@ -89,7 +89,7 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(r['messages'], [{'role':'user','text':'[REDACTED]'}])
     def test_mcp(self):
         r = mcp(self.b, {'jsonrpc':'2.0','id':1,'method':'tools/list'})
-        self.assertEqual(len(r['result']['tools']),6)
+        self.assertEqual(len(r['result']['tools']),8)
         r = mcp(self.b, {'jsonrpc':'2.0','id':2,'method':'tools/call','params':{'name':'list_projects'}})
         self.assertEqual(json.loads(r['result']['content'][0]['text']), ['demo'])
     def test_http(self):
