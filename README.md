@@ -9,13 +9,15 @@
 ## 当前验证状态
 
 - 新标准 `/mcp` HTTP 采用官方 SDK v1 兼容线，明确支持 2025-03-26 / 2025-06-18 / 2025-11-25；不声称支持 2026-07-28
-- 自动契约测试覆盖真实本地 HTTP、官方 Python SDK 客户端与安全边界；ZCode/Claude Code 配置经过文档和结构核对，但尚无这两个客户端的真实端到端验收
-- 新候选没有部署到真实 VM、开放公网或改变现有会话/隧道；下面的接通记录仅是此前版本记录
+- 自动契约测试覆盖真实本地 HTTP、官方 Python SDK 客户端与安全边界；ZCode/Claude Code 配置示例经过文档和结构核对
+- **2026-10-07 用户实测反馈**：ZCode 3.14.4 经 Windows → SSH 回环转发 8766 → Ubuntu，合成目录的 `list_projects`、`read_file`、`search_text` 三项调用通过。[具体结果与证据范围](docs/CLIENTS.md#zcode-3144-合成目录反馈)
+- 该记录依据用户回传的工具结果，未直接采集 ZCode 运行日志；Claude Code、ZCode stdio、真实项目和当前候选的 Codex 历史接入仍未完成真实客户端验收
+- 本轮实际接入仅用于独立 files-only 合成目录，不代表旧桥接已切换，也不涵盖公网/OAuth、自动重启或新增写入权限；下面两项是此前版本的接通记录
 
-- 已实际验证 Ubuntu / Python 3.12.3、Codex CLI 0.159.2、官方 tunnel-client v0.0.15
-- 通过 ChatGPT 自定义 MCP 的隧道入口，真实调用 `list_projects`、`list_files`、`read_file`、`read_thread` 成功
+- 此前 0.2.0 已实际验证 Ubuntu / Python 3.12.3、Codex CLI 0.159.2、官方 tunnel-client v0.0.15
+- 此前 0.2.0 通过 ChatGPT 自定义 MCP 的隧道入口，真实调用 `list_projects`、`list_files`、`read_file`、`read_thread` 成功
 - 本仓库包含只读工具的自动化测试；CI 配置检查 Python 3.11、3.12、3.13。实际 CI 结果以当前提交的 Actions 为准
-- 当前候选的自动化测试已通过，但尚未在真实目标环境部署验收；上面的真实接通记录来自此前 0.2.0 实现，不代表本候选已完成端到端实测
+- 当前候选的自动化测试与上述三项用户回传结果分别记录；此前 0.2.0 的成功不能替代当前候选其他功能的目标环境验收
 - `thread/turns/list` 为实验性 Codex API，其他版本和系统组合未承诺兼容；尚未做独立渗透测试或多用户生产认证
 
 本项目采用 [MIT 许可证](LICENSE)。使用、修改和再分发时请保留版权与许可声明；软件按现状提供，不作担保。维护者发布流程见[发布清单](docs/RELEASING.md)。
