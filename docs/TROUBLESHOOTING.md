@@ -47,6 +47,21 @@
 - **UI 没有隧道入口**：功能可能受账户/工作区可用性影响；查官方帮助/管理员。不能填入本地 HTTP API 代替 MCP 服务
 - **想贴日志求助**：先人工删除 key、Authorization、tunnel ID、项目路径、thread ID、聊天内容。最好只贴版本、错误类别和合成复现
 
-## HTTP API
+## 旧 HTTP API（--transport http）
 
 401 表示 bearer token 不匹配；403 表示 Origin 或 Host 不允许；404 表示路径不为 `/v1/call`；400/413 表示请求格式或大小不符合要求。HTTP 客户端需正确的 JSON Content-Type、Content-Length 与 `Host: 127.0.0.1:端口` 或 `localhost:端口`。不要在浏览器脚本中调用或通过伪造 header 绕过保护。
+
+
+## 标准 MCP HTTP（--transport streamable-http）
+
+- 启动提示安装 extra：使用独立虚拟环境 `python3 -m pip install ".[http]"`；要求官方 mcp>=1.30,<2，不能让旧1.29或新v2混进当前运行环境
+- 401：确认服务环境和客户端使用同一专用 token；不要把 token 放在 URL、日志或 issue
+- 403：SSH本地端口须与服务端端口相同；Host仅允许loopback加实际端口；所有浏览器 Origin 都拒绝
+- 404：标准地址严格为 `/mcp`，无末尾斜杠/query；`/v1/call` 是另一个私有REST服务
+- 400 / Unsupported protocol：此候选支持2025握手协议，暂不支持2026新生命周期；ZCode设为legacy，其他客户端需支持旧协议协商
+- 406：Accept需同时允许 application/json 和 text/event-stream，即使本服务选择JSON响应
+- 405 GET/DELETE：无状态JSON模式的预期行为，不提供GET事件流或可删除session
+- 工具忙/超时：等待正在执行的读取完成后再重试，必要时让操作者检查底层文件系统；超时不会释放仍在执行I/O的工作线程名额
+- ZCode认证头无效：原生配置没有已确认的 `${BRIDGE_TOKEN}` 插值契约，按[客户端指南](CLIENTS.md)使用私有Headers配置；Claude Code支持其自己的插值规则
+
+完整错误与资源契约见[Streamable HTTP](STREAMABLE_HTTP.md)。不要为接入客户端而关闭认证、改变监听地址或扩大项目白名单。
